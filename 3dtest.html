@@ -26,12 +26,12 @@
 				var soundSrc;
 				var sndObj = {};
 				var duration = 0;
-				var context = new AudioContext();
+				var context;
 				
 				this.loadSound = function(file, onLoaded) {
 					console.log("loading file: " + file);
 					window.AudioContext = window.AudioContext || window.webkitAudioContext;
-					var context = new AudioContext();
+					context = new AudioContext();
 					var fr = new FileReader();
 					
 					fr.onload = function(event) {
@@ -46,14 +46,13 @@
 					fr.readAsArrayBuffer(file);
 				};
 				
-				this.playSound = function(obj, reversed) {
+				this.playSound = function(reversed) {
 					console.log("playing");
-					var context = new AudioContext();
 					/*if(soundSrc)
 						soundSrc.stop();*/
 					
 					soundSrc = context.createBufferSource();
-					soundSrc.buffer = reversed ? obj.reversed : obj.forward;
+					soundSrc.buffer = reversed ? sndObj.reversed : sndObj.forward;
 					//soundSrc.buffer = obj.reversed;
 					//soundSrc.playbackRate = 1;
 					soundSrc.connect(context.destination);
