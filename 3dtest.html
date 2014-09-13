@@ -1,0 +1,149 @@
+<html>
+	<head>
+		<script src="jquery-2.1.1.min.js"></script>
+		<style type="text/css">
+		  .box {
+		  position:absolute;
+		  border: 1px solid;
+		  width: 100px;
+		  height: 100px;
+		  background: red;
+		  }
+		</style>
+		<script type="text/javascript">
+			var xpos = 700;
+			var ypos = 450;
+			var rad = 700;
+			var vrad = 300;
+			var soundSrc;
+			var sndObj = {};
+			var readHead = {
+				forward: true,
+				songPosition: 0,
+				lastStarted: 0};
+				
+			function placeDiv(div, deg) {
+				div.css("top", ypos-vrad*Math.sqrt(Math.sin(deg/360*2*Math.PI)));
+				div.css("left", xpos + rad*Math.cos(deg/360*2*Math.PI));
+				div.css("-webkit-transform", 'rotateY('+(deg-90)+'deg)');
+				div.css("transform", 'rotateY('+(deg-90)+'deg)');	
+			}
+			
+			function tick(){
+				//console.log("called");
+				var div = $("#1");
+				div[0].phi += 10;
+				var phi = div[0].phi;
+				if(Math.floor(phi / 180)%2==0) { //headed left
+					div[0].angle = phi % 180;
+				} else {
+					div[0].angle = 180 - (phi % 180);
+				}
+				
+				placeDiv(div, div[0].angle);
+				
+				setTimeout(tick, 100);
+			}
+			
+			function cloneAndReverse(audiobuffer) {
+				var output = context.createBuffer(
+					audiobuffer.numberOfChannels,
+					audiobuffer.length,
+					audiobuffer.sampleRate);
+				for(var i=0;i<audiobuffer.numberOfChannels;i++) {
+					output.getChannelData(i).set(audiobuffer.getChannelData(i));
+					Array.prototype.reverse.call(output.getChannelData(i));
+				}
+				return output;
+			}
+			
+			function loadSound(file, onLoaded) {
+				console.log("loading file: " + file);
+				var ret = {};
+				window.AudioContext = window.AudioContext || window.webkitAudioContext;
+				var context = new AudioContext();
+				var fr = new FileReader();
+				
+				fr.onload = function(event) {
+					console.log("input loaded "+fr.result);
+					context.decodeAudioData(fr.result, function(buffer) {
+						ret.forward = buffer;
+						ret.reversed = cloneAndReverse(buffer);
+						onLoaded(ret, false);
+					});
+				};
+				fr.readAsArrayBuffer(file);
+				
+					
+			}
+			
+			function playSound(obj, reversed) {
+				console.log("playing");
+				var context = new AudioContext();
+				soundSrc.stop();
+				soundSrc = context.createBufferSource();
+				soundSrc.buffer = reversed ? obj.reversed : obj.forward;
+				//soundSrc.buffer = obj.reversed;
+				//soundSrc.playbackRate = 1;
+				soundSrc.connect(context.destination);
+				//soundSrc.start(20);
+				sndObj = obj;
+				soundSrc.start(0);
+				readHead.forward = !reversed;
+				readHead.lastStarted = new Date().getTime();
+			}
+			
+			
+			function handleSelect(event) {
+				console.log("handling select "+event);
+				loadSound(event.target.files[0], playSound);
+			}
+			
+			$().ready(function(){
+				console.log('ready');
+				/*$("#1")[0].phi = 0;
+				$("#sound")[0].playbackRate.value = -1;
+				$("#sound")[0].controls = 1;
+				$("#sound")[0].play();*/
+				context = new AudioContext();
+				$("#file")[0].addEventListener('change', handleSelect, false);
+				$("#stop")[0].addEventListener('click', function(){
+					soundSrc.stop();
+				});
+				$("#startrev")[0].addEventListener('click', function() {
+					soundSrc.stop();
+					soundSrc = context.createBufferSource();
+					soundSrc.connect(context.destination);
+					soundSrc.buffer = sndObj.reversed;
+					soundSrc.start();
+				});
+				
+				
+				//$("#sound")[0].pause();
+				
+				
+				
+				//setTimeout(tick, 100);
+				
+				for(var theta=0;theta<=180;theta+=10) {
+					var div = $("<div class='box'>something</div>");
+					div.appendTo("body");
+					//div.css("top", ypos);
+					//div.css("left", xpos + rad*Math.cos(theta));
+					placeDiv(div, theta);					
+				}
+			});
+					
+		</script>
+	</head>
+	<body>
+		<!--<div id='1' class="box">
+			something
+		</div>-->
+		<!--<audio id="sound" src="stylo.mp3"></audio>-->
+		<input type="file" id="file" name="file" />
+		<input type="button" id="stop" value="stop" />
+		<input type="button" id="startrev" value="start reversed" />
+		
+	</body>
+</html>
