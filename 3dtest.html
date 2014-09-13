@@ -2,13 +2,13 @@
 	<head>
 		<script src="jquery-2.1.1.min.js"></script>
 		<style type="text/css">
-		  .box {
-		  position:absolute;
-		  border: 1px solid;
-		  width: 100px;
-		  height: 100px;
-		  background: red;
-		  }
+			.box {
+				position:absolute;
+				border: 1px solid;
+				width: 100px;
+				height: 100px;
+				background: red;
+			}
 		</style>
 		<script type="text/javascript">
 			var xpos = 700;
@@ -17,7 +17,9 @@
 			var vrad = 300;
 			var soundSrc;
 			var sndObj = {};
+			var duration = 0;
 			var readHead = {
+				playing: false,
 				forward: true,
 				songPosition: 0,
 				lastStarted: 0};
@@ -67,20 +69,22 @@
 				fr.onload = function(event) {
 					console.log("input loaded "+fr.result);
 					context.decodeAudioData(fr.result, function(buffer) {
+						duration = buffer.duration;
 						ret.forward = buffer;
 						ret.reversed = cloneAndReverse(buffer);
 						onLoaded(ret, false);
 					});
 				};
 				fr.readAsArrayBuffer(file);
-				
 					
 			}
 			
 			function playSound(obj, reversed) {
 				console.log("playing");
 				var context = new AudioContext();
-				soundSrc.stop();
+				/*if(soundSrc)
+					soundSrc.stop();*/
+				
 				soundSrc = context.createBufferSource();
 				soundSrc.buffer = reversed ? obj.reversed : obj.forward;
 				//soundSrc.buffer = obj.reversed;
@@ -88,7 +92,11 @@
 				soundSrc.connect(context.destination);
 				//soundSrc.start(20);
 				sndObj = obj;
-				soundSrc.start(0);
+				if(reversed)
+					soundSrc.start(0, duration-(readHead.songPosition));
+				else
+					soundSrc.start(0, readHead.songPosition);
+				readHead.playing = true;
 				readHead.forward = !reversed;
 				readHead.lastStarted = new Date().getTime();
 			}
@@ -97,6 +105,25 @@
 			function handleSelect(event) {
 				console.log("handling select "+event);
 				loadSound(event.target.files[0], playSound);
+			}
+			
+			function stopAndUpdateHead() {
+				if(!readHead.playing)
+					return;
+				soundSrc.stop();
+				readHead.playing = false;
+				
+				var now = new Date().getTime();
+				var delta = now - (readHead.lastStarted);
+				delta /= 1000;
+				if(!readHead.forward)
+					delta *= -1;
+				readHead.songPosition += delta;
+				if(readHead.songPosition < 0)
+					readHead.songPosition = 0;
+				else if(readHead.songPosition > duration)
+					readHead.songPosition = duration;
+				console.log("position now at: " + readHead.songPosition);
 			}
 			
 			$().ready(function(){
@@ -108,14 +135,19 @@
 				context = new AudioContext();
 				$("#file")[0].addEventListener('change', handleSelect, false);
 				$("#stop")[0].addEventListener('click', function(){
-					soundSrc.stop();
+					stopAndUpdateHead();
 				});
 				$("#startrev")[0].addEventListener('click', function() {
-					soundSrc.stop();
-					soundSrc = context.createBufferSource();
+					stopAndUpdateHead();
+					/*soundSrc = context.createBufferSource();
 					soundSrc.connect(context.destination);
 					soundSrc.buffer = sndObj.reversed;
-					soundSrc.start();
+					soundSrc.start();*/
+					playSound(sndObj, true);
+				});
+				$("#start")[0].addEventListener('click', function() {
+					stopAndUpdateHead();
+					playSound(sndObj, false);
 				});
 				
 				
@@ -143,6 +175,7 @@
 		<!--<audio id="sound" src="stylo.mp3"></audio>-->
 		<input type="file" id="file" name="file" />
 		<input type="button" id="stop" value="stop" />
+		<input type="button" id="start" value="start" />
 		<input type="button" id="startrev" value="start reversed" />
 		
 	</body>
