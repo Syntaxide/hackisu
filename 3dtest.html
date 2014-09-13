@@ -27,6 +27,8 @@
 				var sndObj = {};
 				var duration = 0;
 				var context;
+				var gainNode;
+				var volume = 1;
 				
 				this.loadSound = function(file, onLoaded) {
 					console.log("loading file: " + file);
@@ -55,7 +57,13 @@
 					soundSrc.buffer = reversed ? sndObj.reversed : sndObj.forward;
 					//soundSrc.buffer = obj.reversed;
 					//soundSrc.playbackRate = 1;
-					soundSrc.connect(context.destination);
+					
+					gainNode = context.createGain();
+					setVolume(volume);
+					soundSrc.connect(gainNode);
+					gainNode.connect(context.destination);
+					
+					
 					//soundSrc.start(20);
 					if(reversed)
 						soundSrc.start(0, duration-(readHead.songPosition));
@@ -83,6 +91,11 @@
 					else if(readHead.songPosition > duration)
 						readHead.songPosition = duration;
 					console.log("position now at: " + readHead.songPosition);
+				};
+				
+				this.setVolume = function(percentage) {
+					volume = percentage;
+					gainNode.gain.value = volume;
 				};
 			}
 				
