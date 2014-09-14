@@ -26,45 +26,57 @@
 				var soundSrc;
 				var sndObj = {};
 				var duration = 0;
-				var context;
-				var gainNode;
-				var volume = 1;
+				var context = new AudioContext();
+				var gainNode = {gain: {value: 0}};
+				var gain = 1;
 				
-				this.loadSound = function(file, onLoaded) {
+				var buildBuffers = function(data, onLoaded) {
+					console.log('decoding...');
+					context.decodeAudioData(data, function(buffer) {
+								duration = buffer.duration;
+								sndObj.forward = buffer;
+								sndObj.reversed = cloneAndReverse(context, buffer);
+								onLoaded(false);
+							});
+				};
+				this.loadSoundFromFile = function(file, onLoaded) {
 					console.log("loading file: " + file);
 					window.AudioContext = window.AudioContext || window.webkitAudioContext;
-					context = new AudioContext();
 					var fr = new FileReader();
 					
 					fr.onload = function(event) {
 						console.log("input loaded "+fr.result);
-						context.decodeAudioData(fr.result, function(buffer) {
-							duration = buffer.duration;
-							sndObj.forward = buffer;
-							sndObj.reversed = cloneAndReverse(context, buffer);
-							onLoaded(false);
-						});
+						buildBuffers(fr.result, onLoaded);
 					};
 					fr.readAsArrayBuffer(file);
 				};
 				
+				this.loadSoundFromUrl = function(url, onLoaded) {
+					var x = new XMLHttpRequest();
+					x.open('GET', url, true);
+					x.responseType = 'arraybuffer';
+					x.onreadystatechange = function() {
+						if(x.readyState == 4) {
+							console.log('received ajax response');
+							buildBuffers(x.response, onLoaded);
+						} else {
+							console.log('odd state change from ajax : ');
+						}
+					};
+					x.send();
+				};
+				
 				this.playSound = function(reversed) {
 					console.log("playing");
-					/*if(soundSrc)
-						soundSrc.stop();*/
 					
 					soundSrc = context.createBufferSource();
 					soundSrc.buffer = reversed ? sndObj.reversed : sndObj.forward;
-					//soundSrc.buffer = obj.reversed;
-					//soundSrc.playbackRate = 1;
 					
 					gainNode = context.createGain();
-					setVolume(volume);
+					gainNode.gain.value = gain;
 					soundSrc.connect(gainNode);
 					gainNode.connect(context.destination);
 					
-					
-					//soundSrc.start(20);
 					if(reversed)
 						soundSrc.start(0, duration-(readHead.songPosition));
 					else
@@ -93,9 +105,9 @@
 					console.log("position now at: " + readHead.songPosition);
 				};
 				
-				this.setVolume = function(percentage) {
-					volume = percentage;
-					gainNode.gain.value = volume;
+				this.setGain = function(g) {
+					gain = g;
+					gainNode.gain.value = g;
 				};
 			}
 				
@@ -136,15 +148,11 @@
 			
 			function handleSelect(event) {
 				console.log("handling select "+event);
-				controller.loadSound(event.target.files[0], controller.playSound);
+				controller.loadSoundFromFile(event.target.files[0], controller.playSound);
 			}			
 			
 			$().ready(function(){
 				console.log('ready');
-				/*$("#1")[0].phi = 0;
-				$("#sound")[0].playbackRate.value = -1;
-				$("#sound")[0].controls = 1;
-				$("#sound")[0].play();*/
 				
 				$("#file")[0].addEventListener('change', handleSelect, false);
 				$("#stop")[0].addEventListener('click', function(){
@@ -152,22 +160,21 @@
 				});
 				$("#startrev")[0].addEventListener('click', function() {
 					controller.stopAndUpdateHead();
-					/*soundSrc = context.createBufferSource();
-					soundSrc.connect(context.destination);
-					soundSrc.buffer = sndObj.reversed;
-					soundSrc.start();*/
 					controller.playSound(true);
 				});
 				$("#start")[0].addEventListener('click', function() {
 					controller.stopAndUpdateHead();
 					controller.playSound(false);
 				});
+				$("#submit_url")[0].addEventListener('click', function() {
+					var url = $("#song_url")[0].value;
+					console.log("loading url: " + url);
+					controller.loadSoundFromUrl(url, controller.playSound);
+				});
 				
 				for(var theta=0;theta<=180;theta+=10) {
 					var div = $("<div class='box'>something</div>");
 					div.appendTo("body");
-					//div.css("top", ypos);
-					//div.css("left", xpos + rad*Math.cos(theta));
 					placeDiv(div, theta);					
 				}
 			});
@@ -182,7 +189,8 @@
 		<input type="file" id="file" name="file" />
 		<input type="button" id="stop" value="stop" />
 		<input type="button" id="start" value="start" />
-		<input type="button" id="startrev" value="start reversed" />
+		<input type="button" id="startrev" value="start reversed" /><br />
+		<input type="text" id="song_url" value="songurl" /><input type="button" id="submit_url" value="submit url" />
 		
 	</body>
 </html>
