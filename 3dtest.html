@@ -95,7 +95,7 @@
 					readHead.playing = false;
 					
 					var now = new Date().getTime();
-					var delta = now - (readHead.lastStarted);
+					var delta = (now - (readHead.lastStarted))*playbackRate;
 					delta /= 1000;
 					if(!readHead.forward)
 						delta *= -1;
