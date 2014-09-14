@@ -29,6 +29,7 @@
 				var context = new AudioContext();
 				var gainNode = {gain: {value: 0}};
 				var gain = 1;
+				var playbackRate = 1;
 				
 				var buildBuffers = function(data, onLoaded) {
 					console.log('decoding...');
@@ -74,6 +75,7 @@
 					
 					gainNode = context.createGain();
 					gainNode.gain.value = gain;
+					soundSrc.playbackRate.value = playbackRate;
 					soundSrc.connect(gainNode);
 					gainNode.connect(context.destination);
 					
@@ -108,6 +110,10 @@
 				this.setGain = function(g) {
 					gain = g;
 					gainNode.gain.value = g;
+				};
+				
+				this.setSpeed = function(s) {
+					playbackRate = s;
 				};
 			}
 				
@@ -171,6 +177,11 @@
 					console.log("loading url: " + url);
 					controller.loadSoundFromUrl(url, controller.playSound);
 				});
+				$("#submit_speed")[0].addEventListener('click', function() {
+					var speed = $("#playback_speed")[0].value;
+					console.log("setting speed: " + speed);
+					controller.setSpeed(speed);
+				});
 				
 				for(var theta=0;theta<=180;theta+=10) {
 					var div = $("<div class='box'>something</div>");
@@ -190,7 +201,8 @@
 		<input type="button" id="stop" value="stop" />
 		<input type="button" id="start" value="start" />
 		<input type="button" id="startrev" value="start reversed" /><br />
-		<input type="text" id="song_url" value="songurl" /><input type="button" id="submit_url" value="submit url" />
+		<input type="text" id="song_url" value="songurl" /><input type="button" id="submit_url" value="submit url" /><br />
+		<input type="text" id="playback_speed" value="1" /><input type="button" id="submit_speed" value="submit speed" />
 		
 	</body>
 </html>
