@@ -9,6 +9,9 @@
 				height: 100px;
 				background: red;
 			}
+			div {
+				border: 1px solid;
+			}
 		</style>
 		<script type="text/javascript">
 			var xpos = 700;
@@ -16,6 +19,7 @@
 			var rad = 700;
 			var vrad = 300;
 			var controller = new SongController();
+			var controller2 = new SongController();
 			
 			function SongController() {
 				var readHead = {
@@ -23,7 +27,7 @@
 					forward: true,
 					songPosition: 0,
 					lastStarted: 0};
-				var soundSrc;
+				var soundSrc = {playbackRate: {value: 1}};
 				var sndObj = {};
 				var duration = 0;
 				var context = new AudioContext();
@@ -68,6 +72,8 @@
 				};
 				
 				this.playSound = function(reversed) {
+					if(readHead.playing)
+						this.stopAndUpdateHead();
 					console.log("playing");
 					
 					soundSrc = context.createBufferSource();
@@ -114,6 +120,7 @@
 				
 				this.setSpeed = function(s) {
 					playbackRate = s;
+					soundSrc.playbackRate.value = s;
 				};
 			}
 				
@@ -152,15 +159,15 @@
 				return output;
 			}		
 			
-			function handleSelect(event) {
-				console.log("handling select "+event);
-				controller.loadSoundFromFile(event.target.files[0], controller.playSound);
-			}			
+						
 			
 			$().ready(function(){
 				console.log('ready');
 				
-				$("#file")[0].addEventListener('change', handleSelect, false);
+				$("#file")[0].addEventListener('change', function (event) {
+					console.log("handling select "+event);
+					controller.loadSoundFromFile(event.target.files[0], controller.playSound);
+					}, false);
 				$("#stop")[0].addEventListener('click', function(){
 					controller.stopAndUpdateHead();
 				});
@@ -183,6 +190,36 @@
 					controller.setSpeed(speed);
 				});
 				
+				//
+				/// FILE TWO
+				//
+				//
+				$("#file2")[0].addEventListener('change', function handleSelect(event) {
+					console.log("handling select "+event);
+					controller2.loadSoundFromFile(event.target.files[0], controller2.playSound);
+				}, false);
+				$("#stop2")[0].addEventListener('click', function(){
+					controller2.stopAndUpdateHead();
+				});
+				$("#startrev2")[0].addEventListener('click', function() {
+					controller2.stopAndUpdateHead();
+					controller2.playSound(true);
+				});
+				$("#start2")[0].addEventListener('click', function() {
+					controller2.stopAndUpdateHead();
+					controller2.playSound(false);
+				});
+				$("#submit_url2")[0].addEventListener('click', function() {
+					var url = $("#song_url2")[0].value;
+					console.log("loading url: " + url);
+					controller.loadSoundFromUrl(url, controller.playSound);
+				});
+				$("#submit_speed2")[0].addEventListener('click', function() {
+					var speed = $("#playback_speed2")[0].value;
+					console.log("setting speed: " + speed);
+					controller.setSpeed(speed);
+				});
+				
 				for(var theta=0;theta<=180;theta+=10) {
 					var div = $("<div class='box'>something</div>");
 					div.appendTo("body");
@@ -197,12 +234,22 @@
 			something
 		</div>-->
 		<!--<audio id="sound" src="stylo.mp3"></audio>-->
-		<input type="file" id="file" name="file" />
-		<input type="button" id="stop" value="stop" />
-		<input type="button" id="start" value="start" />
-		<input type="button" id="startrev" value="start reversed" /><br />
-		<input type="text" id="song_url" value="songurl" /><input type="button" id="submit_url" value="submit url" /><br />
-		<input type="text" id="playback_speed" value="1" /><input type="button" id="submit_speed" value="submit speed" />
+		<div>
+			<input type="file" id="file" name="file" />
+			<input type="button" id="stop" value="stop" />
+			<input type="button" id="start" value="start" />
+			<input type="button" id="startrev" value="start reversed" /><br />
+			<input type="text" id="song_url" value="songurl" /><input type="button" id="submit_url" value="submit url" /><br />
+			<input type="text" id="playback_speed" value="1" /><input type="button" id="submit_speed" value="submit speed" />
+		</div>
+		<div>
+			<input type="file" id="file2" name="file" />
+			<input type="button" id="stop2" value="stop" />
+			<input type="button" id="start2" value="start" />
+			<input type="button" id="startrev2" value="start reversed" /><br />
+			<input type="text" id="song_url2" value="songurl" /><input type="button" id="submit_url2" value="submit url" /><br />
+			<input type="text" id="playback_speed2" value="1" /><input type="button" id="submit_speed2" value="submit speed" />
+		</div>
 		
 	</body>
 </html>
