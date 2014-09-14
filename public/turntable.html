@@ -3,11 +3,13 @@
 		<title>Turntable</title>
 		<script type="text/javascript" src="http://js.leapmotion.com/leap-0.6.2.min.js"></script>		
 		<script type="text/javascript" src="jquery.js"></script>
+		<script type="text/javascript" src="backend.js"></script>
+		<script type="text/javascript" src="songcontroller.js"></script>
 		<script type="text/javascript" src="script.js"></script>
 		<link rel="stylesheet" type="text/css" href="style.css"/>
 	</head>
 	<body>
-		<div id="plane">
+		<div id="plane"> <!--safsdfsdklfjasldfkjalskdfjhksadjlfhslakdfjhalk-->
 			<div id="display"></div>
 			<div id = "display2"></div>
 			<div id="display3"></div>
@@ -45,16 +47,21 @@
 						<div class="hole"></div>
 					</div>
 					<div id="menu2" class="menu">
+						<div class="current_song menu_item">Current Song</div>
+						<div class="unselected_item menu_item">Song 1</div>
+						<div class="unselected_item menu_item">Song 2</div>
+						<div class="unselected_item menu_item">Song 3</div>
+						<div class="unselected_item selected_menu_item menu_item">Song 4 (selected)</div>
 					</div>
 				</div>
 			</div>
 			
-			<!--<div class="switch_container">
+			<div class="switch_container">
 				<div class="switch_background">
 					<div class="switch"></div>
 				</div>
 				<div class="label">Crossfade</div>
-			</div>-->
+			</div>
 		</div>
 	</body>
 </html>

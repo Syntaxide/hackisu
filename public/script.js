@@ -16,9 +16,18 @@ $(function() {
 	var discRadius = 700;
 	var fps =60;
 	var timeout = 1000/fps;
-	var left = new turnTable("cover1",-58,0,true, 0);
-	var right = new turnTable("cover2",58,0,false,0);
-		
+	var songController1 = new SongController();	
+	var songController2 = new SongController();
+	var backend = new BackEnd();
+	backend.GetUrlForTrack(167554498 , function(url){
+		songController1.loadSoundFromUrl(url);
+			songController2.loadSoundFromUrl(url);
+	});
+	
+	var left = new turnTable("cover1",-58,0,true, 0,"menu1", songController1);
+	var right = new turnTable("cover2",58,0,false,0,"menu2", songController2);
+	//var left = new turnTable("cover1",-58,0,true, 0,"menu1");
+	//var right = new turnTable("cover2",58,0,false,0,"menu2");
 	var controller = new Leap.Controller();
 	controller.on('connect', function(){
 		setInterval(function(){
@@ -28,6 +37,7 @@ $(function() {
 	controller.connect();
 	
 	function onFrame(frame) {
+		//console.log(frame);
 		//console.log(frame);
 		if(frame && frame.valid) {
 			clearCanvas();
@@ -68,7 +78,8 @@ $(function() {
 								left.setCoverDown(true);
 							}
 						}
-						else {
+						
+						if(!isCover || left.getDragStatus()){
 							left.handleFrame(entity,frame);
 							leftStop=true;
 						}
@@ -79,20 +90,24 @@ $(function() {
 								right.setCoverDown(true);
 							}
 						}
-						else {
+						
+						if(!isCover || right.getDragStatus()){
 							right.handleFrame(entity,frame);
 							rightStop=true;
 						}
 					}
 				}
 				else if (isCover) {
-					if(left.getCoverStatus()) {
+					if( isLeft && left.getCoverStatus()) {
 						left.setCoverDown(false);
-						console.log("left menu");
+						left.toggleMenu();
+						left.togglePause();
 					}
-					else if(right.getCoverStatus()){
+					
+					if (!isLeft && right.getCoverStatus()){
 						right.setCoverDown(false);
-						console.log("right menu");
+						right.toggleMenu();
+						right.togglePause();
 					}
 				}
 				
@@ -109,10 +124,13 @@ $(function() {
 		}
 	}
 	
-	function turnTable(id, xOrigin, yOrigin, isLeft, xOffset, menuID) {
+	function turnTable(id, xOrigin, yOrigin, isLeft, xOffset, menuID, songController) {
 		var self = this;
+		
+		self.songController = songController;
+				self.songController.playSound(true);
 		self.turnTable = $("#"+id);
-		self.menu = $("#menuID");
+		self.menu = $("#"+menuID);
 		self.rotation = 0;
 		self.xOrigin = xOrigin;
 		self.yOrigin = yOrigin;
@@ -126,6 +144,14 @@ $(function() {
 		self.stop = false;
 		self.coverDown = false;
 		self.isDrag=false;
+		self.menuVisible=false;
+		
+		self.togglePause = function() {
+			self.stop=!self.stop;
+		}
+		self.play =function() {
+			self.stop=false;
+		}
 		self.setDrag = function(isDrag) {
 			self.isDrag = isDrag;
 		}
@@ -162,8 +188,11 @@ $(function() {
 				if(self.rotation<0) {
 					rotation = 360;
 				}
+				var rate = (oldAngle-newAngle)*2;
+				self.songController.setSpeed(rate);
 				self.rotation+=(oldAngle-newAngle)*2;
 				self.turnTable.css("transform", "rotateZ("+self.rotation+"deg)");
+				
 				self.isDrag=true;
 			}
 			else if(!frame.hand(self.oldID).valid){
@@ -174,7 +203,11 @@ $(function() {
 		}
 		
 		self.rotateDisc = function() {
+			self.songController.setSpeed(1);
 			self.isDrag=false;
+			if(self.stop) {
+				return;
+			}
 			self.oldID = null;
 			self.oldPos = null;
 			if(self.rotation>=360) {
@@ -184,15 +217,32 @@ $(function() {
 			self.rotation+=self.step;
 		};
 		
+		self.toggleMenu = function() {
+			if(self.menuVisible) {
+				self.hideMenu();
+			}
+			else {
+				self.showMenu();
+			}
+		}
+		
 		self.showMenu =function() {
+			//console.log("showMenu");
+			self.menu.fadeIn();
+			self.menuVisible=true;
+			/*self.menu.animate({height:"30em"}, 500, function(){
+				
+			});*/
 		};
 		
 		self.hideMenu = function() {
+			self.menu.fadeOut();
+			self.menuVisible=false;
 		};
 		
 		return {handleFrame:self.handleFrame, rotateDisc:self.rotateDisc, origin:self.origin, turntable: self.turnTable, 
 				setCoverDown:self.setCoverDown,getCoverStatus:self.getCoverStatus, setDrag:self.setDrag, getDragStatus:self.getDragStatus,
-				showMenu:self.showMenu,hideMenu:self.hideMenu};
+				showMenu:self.showMenu,hideMenu:self.hideMenu, togglePause:self.togglePause, toggleMenu:self.toggleMenu, play:self.play};
 	}
 	
 	function isInBox(x, y, box) {
