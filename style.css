@@ -1,0 +1,264 @@
+body {
+	font-family:Segoe UI, Sans Serif;
+	background-color:dimgray;
+	/*perspective-origin:50% bottom;
+	perspective:4000;*/
+	-webkit-transform-style: preserve-3d;
+	transform-style: preserve-3d;
+}
+
+#plane {
+	/*transform: rotateX(45deg);*/
+}
+
+#display{
+	/*position:fixed;
+	top:0;
+	left:0;
+	opacity:0.5;
+	width:100%;
+	height:100%;
+	z-index:2;*/
+	position:fixed;
+	top:0;
+	left:0;
+	width:10em;
+	height:1.5em;
+}
+
+#display2{
+	position:fixed;
+	top:2em;
+	left:0;
+	width:10em;
+	height:1.5em;
+}
+
+#display3 {
+	position:fixed;
+	top:0;
+	right:0;
+	width:10em;
+	height:1.5em;
+}
+
+#dsplay4{
+	position:fixed;
+	top:2em;
+	right:0;
+	width:10em;
+	height:1.5em;
+}
+
+#overlay {
+	position:fixed;
+	top:0;
+	left:0;
+	opacity:0.5;
+	z-index:1;
+}
+
+.object {
+	position:absolute;
+	top:500;
+	left:500;
+	width:300px;
+	height:300px;
+	background-color:blue;
+	display:inline-block;
+}
+
+.selected {
+	border:2px solid gray;
+}
+
+body {
+
+}
+
+#left {
+	perspective-origin:34.75em center;
+	perspective:2000;
+	position:absolute;
+	left:0;
+}
+
+#right {
+	perspective-origin:17.5em center;
+	perspective:2000;
+	position:absolute;
+	right:0;
+}
+
+.underlay {
+	width:50%;
+	height:75%;
+}
+
+.disc {
+	position:absolute;
+	width:45em;
+	height:45em;
+	border-radius:100%;
+	border:4px solid #008CBA;
+	background-color:black;
+	transform: rotateX(60deg);
+}
+
+#overlay_container1 {
+	width:50%;
+	height:75%;
+	position:absolute;
+	display:inline-block;
+	z-index:2;
+	perspective-origin:34.75em center;
+	perspective:2000;
+}
+
+#overlay_container2 {
+	width:50%;
+	height:75%;
+	position:absolute;
+	display:inline-block;
+	z-index:2;
+	perspective-origin:17.5em center;
+	perspective:2000;
+}
+
+.disc_overlay {
+	width:46em;
+	height:25.5em;
+	z-index:2;
+}
+
+.cover_overlay {
+	position:absolute;
+	top:50%;
+	left:50%;
+	width:17.5em;
+	height:9em;
+	margin-left:-8.7em;
+	margin-top:-6.5em;
+}
+
+#disc_overlay1 {
+	position:absolute;
+	top:19.5em;
+	left:9.5em;
+}
+
+#disc_overlay2 {
+	position:absolute;
+	top:19.5em;
+	right:9.5em;
+}
+
+#disc1 {
+	z-index:0;
+	top:7.5em;
+	left:10em;
+	box-shadow: 0 5px 5px black;
+}
+
+#disc2 {
+	z-index:0;
+	top:7.5em;
+	right:10em;
+	box-shadow: 0 5px 5px black;
+}
+
+.hole {
+	border-radius:100%;
+	position:absolute;
+	top:50%;
+	left:50%;
+	width:1em;
+	height:1em;
+	margin-left:-.5em;
+	margin-top:-.5em;
+	background-color:black;
+	border:1px solid #008CBA;
+}
+
+#cover1 {
+	background-image:url(http://upload.wikimedia.org/wikipedia/en/4/49/Daft_Punk_Alive_2007.JPG);
+}
+
+#cover2 {
+	background-image:url(http://www.ombreflets.com/images/chroniques/39.jpg);
+	background-position:center;
+}
+
+.switch_container {
+	position:absolute;
+	bottom:8em;
+	left:27.5%;
+	width:45%;
+	display:inline-block;
+	height:5em;
+	perspective-origin:50% bottom;
+	perspective:1000;
+	opacity:.5;
+	text-align:center;
+}
+
+.switch_background {
+	width:100%;
+	border-radius:25px;
+	transform: rotateX(30deg) translate3d(0,0,.5em);
+	background-color:black;
+	border:3px solid #008CBA;
+	height:5.1em;
+	display:inline-block;
+	box-shadow: 0 5px 5px black;
+	overflow:hidden;
+}
+
+.switch {
+	border-radius:20px;
+	position:absolute;
+	width:10%;
+	height:4.9em;
+	background-color:#008CBA;	
+	display:inline-block;
+	border:2px solid black;
+	/*box-shadow: 5px 0 5px black;*/
+}
+
+.menu {
+	display:none;
+	opacity:.95;
+	position:absolute;
+	top:50%;
+	left:50%;
+	width:20em;
+	height:1em;
+	/*height:30em;*/
+	margin-left:-10em;
+	margin-top:-12.5em;
+	background-color:white;
+	border:3px solid #008CBA;
+	transform: translateY(-8em);
+	box-shadow: 0 5px 5px black;
+}
+
+.label{
+	transform: rotateX(30deg) translate3d(0,0,.5em);
+	font-size:1.5em;
+}
+
+.cover {
+	margin:0;
+	padding:0;
+	border-radius:100%;
+	position:absolute;
+	top:50%;
+	left:50%;
+	width:20em;
+	height:20em;
+	margin-left:-10.6em;
+	margin-top:-10.6em;
+	overflow:hidden;
+	/*border:10px solid black;*/
+	border:10px solid #008CBA;
+}
